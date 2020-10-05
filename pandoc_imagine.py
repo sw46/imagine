@@ -671,6 +671,32 @@ class Flydraw(Handler):
             return self.result()
 
 
+class Goat(Handler):
+    '''
+    sudo apt-get install flydraw
+    http://manpages.ubuntu.com/manpages/precise/man1/flydraw.1.html
+    notes:
+    - graphic data is printed to stdout
+    - so 'stdout' in im_out option is silently ignored
+    '''
+    # - flydraw reads its commands from stdin & produces output on stdout
+    cmdmap = {'goat': 'goat'}
+
+    def image(self):
+        'goat <fname>.goat {im_opt}'
+        # remove stdout from im_out, it contains graphic output, not text
+        self.im_fmt = 'svg'
+        self.im_out = [x for x in self.im_out if x not in ['stdout']]
+        self.tmpfile = self.basename + '.%s' % self.im_fmt + ".tmp"
+        self.outfile = self.basename + '.%s' % self.im_fmt
+        args = [self.inpfile] + self.im_opt
+        if self.cmd(self.im_prg, *args):
+            if self.stdout:
+                self.write('wb', self.stdout, self.tmpfile)
+                os.system("rsvg-convert -x 0.7 -y 0.7 -f svg '{}' > '{}'".format(self.tmpfile, self.outfile))
+            return self.result()
+
+
 class Gle(Handler):
     '''
     sudo apt-get install gle-graphics
